@@ -3,11 +3,21 @@ const cors = require('cors');
 const app = express();
 const port = process.env.PORT || 5000;
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion,ObjectId } = require('mongodb');
 
 //middleware 
-app.use(cors());
-app.use(express.json());
+const corOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://z-handicraft.web.app',
+    
+  ],
+  credentials: true,
+  optionSuccessStatus: 200,
+}
+app.use(cors(corOptions))
+app.use(express.json())
 
 
 
@@ -38,6 +48,15 @@ async function run() {
       res.send(result);
     })
     
+
+    //item details 
+
+    app.get('/items/:id', async (req,res) => {
+      const id = req.params.id
+      const query = {_id: new ObjectId(id)}
+      const result = await handyCollection.findOne(query)
+      res.send(result);
+    })
 
 
     //pagination 
