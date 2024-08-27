@@ -27,6 +27,58 @@ async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
+
+
+
+    const handyCollection = client.db('handicraftDB').collection('handyitems')
+
+    app.get('/items', async (req, res) => {
+      const result = await handyCollection.find().toArray()
+
+      res.send(result);
+    })
+    
+
+
+    //pagination 
+
+    app.get('/all-vols', async (req, res) => {
+      
+      const size = parseInt(req.query.size)
+      const page = parseInt(req.query.page) -1
+      const filter = req.query.filter
+      const search = req.query.search
+      
+      console.log(size,page);
+      
+      let query = {
+        title: {$regex: search, $options: 'i'},
+      }
+      if(filter) query.category = filter
+
+      const result = await handyCollection.find(query).skip(page*size).limit(size).toArray()
+
+
+      res.send(result);
+    })
+
+    app.get('/vol-sum', async (req, res) => {
+      const filter = req.query.filter
+      const search = req.query.search
+      // let query = {}
+      // if(filter) query = {Category:filter}
+      let query = {
+        title: {$regex: search, $options: 'i'},
+      }
+      if(filter) query.Category = filter
+
+      const sum = await handyCollection.countDocuments(query)
+
+      
+
+      res.send({sum});
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
